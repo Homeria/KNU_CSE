@@ -1,0 +1,367 @@
+package week6;
+
+import java.util.*;
+
+public class Crypt6 {
+
+	
+	
+	public static void main(String[] args) {
+		
+		Scanner input = new Scanner(System.in);
+		
+		
+		String cryptedSample = "??i ????? h???? u?? ????? ??i? ??i ???? ??m";
+		String sample = "the quick brown fox jumps over the lazy dog";
+		
+		System.out.println("cryptedSample = " + cryptedSample);
+		
+		
+		//System.out.println(map);
+		
+		//int wordCount = Integer.parseInt(input.nextLine());
+		
+		
+		int wordCount = 5;
+		
+		
+		String original = "abcdd hijk lmnop qrstuv wxyzz";
+		String cryptOriginal = "tzwbb nofdx phqgg eayl jkrcvs";
+		
+		
+		String[] splitedOriginal = original.split(" ");
+		
+		
+		ArrayList<Map<Character, Character>> list = mapping(cryptedSample);
+		
+		System.out.println();
+		System.out.println("====== list map check =====");
+		System.out.println();
+		System.out.println("map = " + list.get(0));
+		System.out.println("map2 = " + list.get(1));
+		System.out.println();
+		System.out.println("===== list map check done =====");
+		System.out.println();
+		
+		System.out.println();
+		
+		System.out.println("========== halfDecrypt Method ==========");
+		
+		String halfCrypt = halfDecrypt(list.get(0), original);
+		System.out.println(halfCrypt);
+		
+		System.out.println("========== halfDecrypt Method done ==========");
+		System.out.println();
+		
+		String[] splitedHalfCrypt = halfCrypt.split(" ");
+		
+		list = additionalMapping(list, splitedHalfCrypt, cryptOriginal);
+		
+		System.out.println("list = " + list);
+		
+		Map<Character, Character> map = list.get(0);
+		Map<Character, Character> map2 = list.get(1);
+		
+		System.out.println("map = " + map);
+		System.out.println("map2 = " + map2);
+		
+		for(int i = 0; i < sample.length(); i++) {
+			char c = sample.charAt(i);
+			if (c != ' ') {
+				System.out.print(map.get(c));
+			} else {
+				System.out.print(' ');
+			}
+		}
+		
+		
+//		System.out.println("========================");
+//		for(int i = 0; i < sample.length(); i++) {
+//			char c = sample.charAt(i);
+//			if (c != ' ') {
+//				System.out.print(map.get(c));
+//			} else {
+//				System.out.print(" ");
+//			}
+//		}
+		
+		
+		input.close();
+	}
+	
+	private static ArrayList<Map<Character, Character>> additionalMapping(ArrayList<Map<Character, Character>> list, String[] dic, String line) {
+		
+		Map<String, String> wordMap = new HashMap<String, String>();
+		
+		String[] splitedLine = line.split(" ");
+		
+		List<String> tmp = new ArrayList<String>();
+		
+		for(int i = 0; i < splitedLine.length; i++) {
+			tmp.add(splitedLine[i]);
+		}
+		
+		
+		
+		System.out.println("========== additionalMapping Method ==========");
+		
+		Map<Character, Character> map = list.get(0);
+		Map<Character, Character> map2 = list.get(1);
+		
+		
+		for(int i = 0; i < dic.length; i++) {
+			String mostSimilary = getMostSimilar(dic[i], tmp);
+			wordMap.put(dic[i], mostSimilary);
+			System.out.println("set : " + dic[i] + " and " + mostSimilary);
+			System.out.println("wordMap = " + wordMap);
+			System.out.println();
+		}
+		
+		System.out.println("**************************************");
+		System.out.println("wordMap result = " + wordMap);
+		
+		Set<String> set = wordMap.keySet();
+		Iterator<String> iter = set.iterator();
+		while(iter.hasNext()) {
+			
+			String key = iter.next();
+			String value = wordMap.get(key);
+			
+			for(int i = 0; i < key.length(); i++) {
+				
+				char keyC = key.charAt(i);
+				char valueC = value.charAt(i);
+				
+				if (!map.containsKey(keyC) && !map.containsValue(valueC)) {
+					map.put(keyC, valueC);
+				}
+				
+				if (!map2.containsKey(valueC) && !map.containsValue(keyC)) {
+					map2.put(valueC, keyC);
+				}
+			}
+		}
+		
+		ArrayList<Map<Character, Character>> newList = new ArrayList<Map<Character, Character>>();
+		newList.add(map);
+		newList.add(map2);
+		return newList;
+	}
+	
+	private static String halfDecrypt(Map<Character, Character> map, String s) {
+		
+		StringBuilder sb = new StringBuilder();
+		for(int i = 0; i < s.length(); i++) {
+			char c = s.charAt(i);
+			if ((c != ' ') && map.containsKey(c)) {
+				sb.append(map.get(c));
+			} else if (c != ' '){
+				sb.append(c);
+			} else {
+				sb.append(" ");
+			}
+		}
+		
+		
+		return sb.toString();
+	}
+	
+	
+	private static String getMostSimilar(String dict, List<String> list) {
+		
+		if(list.size() == 1) {
+			return list.get(0);
+		}
+		
+		int[] similarity = new int[list.size()];
+		int[] length = new int[list.size()];
+		
+		List<String> candidate = new ArrayList<String>();
+		
+		int[] candidateIndex = new int[list.size()];
+		
+		for(int i = 0; i < candidateIndex.length; i++) {
+			candidateIndex[i] = list.size() + 100;
+		}
+		
+		int dictLength = dict.length();
+		
+		String target = null;
+		
+		for(int i = 0; i < list.size(); i++) {
+			length[i] = list.get(i).length();
+			similarity[i] = getSimilarity(dict, list.get(i));
+		}
+		
+		
+		System.out.println();
+		System.out.print("similarity : [");
+		for(int i = 0; i < similarity.length; i++) {
+			System.out.print(similarity[i] + " ");
+		}
+		System.out.println("]");
+		
+		System.out.print("length : [");
+		for(int i = 0; i < length.length; i++) {
+			System.out.print(length[i] + " ");
+		}
+		System.out.println("]");
+		System.out.println("dictLength = " + dictLength);
+		
+		
+		if (isOnly(dict, length)) {
+			int index = getIndex(dict.length(), length);
+			target = list.get(index);
+			removeTarget(target, list);
+			return target;
+		}
+		
+		
+		int similarityMax = getMax(similarity);
+		
+		for(int i = 0; i < length.length; i++) {
+			if ((length[i] == dict.length()) && (similarity[i] == similarityMax) && (findMaxCount(dict) == findMaxCount(list.get(i)))) {
+				System.out.println("candidate : " + list.get(i));
+				candidate.add(list.get(i));
+			}
+		}
+		
+		if(candidate.size() == 1) {
+			target = candidate.get(0);
+			removeTarget(target, list);
+			
+		} else {
+			target = candidate.get(compareCandidate(candidate, dict));
+			removeTarget(target, list);
+		}
+		
+		return target;
+	}
+	
+	private static int compareCandidate(List<String> list, String dict) {
+		
+		int index = 0;
+		int min = 100;
+		
+		for(int i = 0; i < list.size(); i++) {
+			String s = list.get(i);
+			for(int j = 0; j < s.length(); j++) {
+				if(dict.charAt(j) == s.charAt(j)) {
+					if (j < min) {
+						min = j;
+						index = i;
+					}
+				}
+			}
+		}
+		
+		return index;
+	}
+	
+	private static int findMaxCount(String word) {
+		
+		int[] cnt = new int[26];
+		int max = 0;
+		
+		for(int i = 0; i < word.length(); i++) {
+			cnt[word.charAt(i) - 97]++;
+		}
+		
+		for(int i = 0; i < cnt.length; i++) {
+			if (cnt[i] > max) {
+				max = cnt[i];
+			}
+		}
+		return max;
+	}
+	
+	private static boolean isOnly(String s1, int[] length) {
+		int count = 0;
+		for(int i = 0; i < length.length; i++) {
+			if (s1.length() == length[i]) {
+				count++;
+			}
+		}
+		return (count == 1);
+	}
+	
+	private static void removeTarget(String s, List<String> list) {
+		for(int i = 0; i < list.size(); i++) {
+			if(s.equals(list.get(i))) {
+				list.remove(i);
+				break;
+			}
+		}
+	}
+	
+	private static int getMax(int[] arr) {
+		int max = 0;
+		for(int i = 0; i < arr.length; i++) {
+			if (arr[i] > max) {
+				max = arr[i];
+			}
+		}
+		return max;
+	}
+	
+	private static int getIndex(int n, int[] arr) {
+		for(int i = 0; i < arr.length; i++) {
+			if (n == arr[i]) {
+				return i;
+			}
+		}
+		return -1;
+	}
+	
+	private static int getSimilarity(String s1, String s2) {
+		System.out.println("getSimilarity : s1 = " + s1 + ", s2 = " + s2);
+		if(s1.length() != s2.length()) {
+			return 0;
+		}
+		
+		int count = 0;
+		for(int i = 0; i < s1.length(); i++) {
+			if (s1.charAt(i) == s2.charAt(i)) {
+				count++;
+			}
+		}
+		return count;
+	}
+	
+	
+	private static ArrayList<Map<Character, Character>> mapping(String s) {
+		
+		System.out.println("========== Mapping Method ==========");
+		System.out.println();
+		System.out.println("s = " + s);
+		Map<Character, Character> map = new HashMap<Character, Character>();
+		Map<Character, Character> map2 = new HashMap<Character, Character>();
+		
+		String sample = "the quick brown fox jumps over the lazy dog";
+		
+		
+		for(int i = 0; i < s.length(); i++) {
+			System.out.println();
+			char c = s.charAt(i);
+			char sampleC = sample.charAt(i);
+			
+			System.out.println("i = " + i + ", c = " + c + ", sampleC = " + sampleC);
+			
+			if ((c != ' ') && (c != '?') && !map.containsKey(c)) {
+				System.out.println("put " + sampleC + " and " + c + " : map");
+				System.out.println("put " + c + " and " + sampleC + " : map2");
+				map.put(sampleC, c);
+				map2.put(c, sampleC);
+			}
+		}
+		
+		ArrayList<Map<Character, Character>> list = new ArrayList<Map<Character, Character>>();
+		list.add(map);
+		list.add(map2);
+		
+		System.out.println("========== Mapping Method done ==========");
+		System.out.println();
+		return list;
+	}
+
+}

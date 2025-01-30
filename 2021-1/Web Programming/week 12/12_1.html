@@ -1,0 +1,37 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>setTimeout() 활용</title>
+<style>
+	span{
+		font-size: 50px;
+		color: brown;
+	}
+</style>
+<script>
+var sum=10;
+function f() {	
+	// 추가한 코드
+	document.getElementById("span").innerHTML = "D-"+sum;
+	
+
+	if(sum == 0) {		
+		//complete the code
+		document.getElementById("span").innerHTML = "Time to have a vacation!";
+		clearInterval(intervalId);
+	}
+
+	sum--;
+}
+// complte the code with proper arguments
+var intervalId = setInterval("f()", 1000);
+</script>
+</head>
+<body>
+<h3>타이머 작동</h3>
+<hr>
+<p>타이머를 이용하여 디데이 카운트 다운을 구현하시오. 10초 후엔 span tag의 innerHTML을 "Time to hava a vacation"으로 바꾸어 문구를 출력하도록 하시오.</p>
+<span id="span"></span>
+</body>
+</html>

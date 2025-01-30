@@ -1,0 +1,26 @@
+rsp = rsp - 40
+rsp + 0x18 <- rax
+rsi <- rsp
+
+call
+
+compare 0 and rsp
+if 0 == rsp -> bomb
+
+compare 1 and rsp + 4
+if (1 == rsp + 4) -> next
+
+rbx <- rsp
+
+move phase_2 + 76
+
+eax <- rbx + 0x4
+eax = eax + rbx
+compare eax and rbx + 0x8
+if(eax == rbx + 0x8) -> next. else -> bomb
+
+rbx = rbx + 0x4
+compare rbp and rbx
+move phase_2 + 88
+
+rax <- rsp + 0x18

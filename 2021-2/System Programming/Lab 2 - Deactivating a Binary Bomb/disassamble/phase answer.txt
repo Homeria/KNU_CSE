@@ -1,0 +1,17 @@
+answer
+
+Warning : "b explode_bomb" and
+b *0x0000555555555ee8
+b *0x0000555555555ee9
+
+phase_1 : I am the mayor. I can do anything I want.
+phase_2 : 0 1 1 2 3 5
+phase_3 : 0 d 390
+phase_4 : 14 7
+phase_5 : BELDOG
+phase_6 : 4 2 6 1 3 5
+
+
+
+
+

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>마우스 클릭 연습</title>
+<script>
+var select = -1; // 선택된 셀
+var score = -1;
+var tds;
+var img;
+
+function set() { 
+	createTable(10);
+	tds = document.getElementsByTagName("td");
+	img = document.createElement("img")
+	img.setAttribute("id", "selected_img");	
+	img.setAttribute("src", 'media/diglett.png');		
+	img.style.display = "block";
+	img.style.margin = "0 auto";
+	img.width = "46";
+	img.height = "46";
+	img.onclick = moveImageAndUpScore;
+	moveImageAndUpScore(); // 셀을 선택하고 이미지 출력
+}
+
+function createTable(size) {
+	// <table> 엘리먼트 만들어 달기
+	var table = document.createElement("table");
+	table.style.border = "1px solid black";
+	table.style.borderCollapse = "collapse"; 
+	document.body.appendChild(table);
+	
+	for(var i=0; i<size; i++) {
+		// <tr> 엘리먼트 만들어 달기
+		var tr = document.createElement("tr");
+		table.appendChild(tr);
+		for(var j=0; j<size; j++) {
+			// <td> 엘리먼트 만들어 달기
+			var td = document.createElement("td");
+			td.style.border = "1px solid black";
+			td.style.width = "50px";
+			td.style.height = "50px";
+			td.style.padding = 0;
+			tr.appendChild(td);
+		}
+	}
+}
+
+// <select> 태그의 change 리스너
+function imgChange() {
+
+
+
+    
+}
+
+// <img> 태그의 click 리스너
+function moveImageAndUpScore() { // 다른 셀로 이미지를 옮기고, 점수를 올려준다
+
+
+
+
+
+
+
+}
+
+</script>
+</head>
+<body onload="set()">
+<h3>캐릭터 잡기</h3>
+<p style="display: inline-block;" >score: <span id="score">0</span></p>
+<select id="character" onchange="imgChange()">	
+	<option value="media/diglett.png" selected>디그다</option>
+	<option value="media/pikachu.png">피카츄</option>
+	<option value="media/hs.jpg">최현수</option>
+</select>
+<hr>
+</body>
+</html>
